@@ -50,6 +50,7 @@ CONVBERT_PRETRAINED_MODEL_ARCHIVE_LIST = [
     # no checkpoints of convbert in huggingface model zoo.
 ]
 
+
 def load_tf_weights_in_convbert(model, config, tf_checkpoint_path, discriminator_or_generator="discriminator"):
     """Load tf checkpoints in a pytorch model. """
     # Todo: load checkpoint from https://github.com/yitu-opensource/ConvBert
@@ -118,9 +119,7 @@ class ConvBertSelfAttention(nn.Module):
             self.num_attention_heads = new_num_attention_heads
         self.all_head_size = self.num_attention_heads * self.attention_head_size
 
-        self.query = nn.Linear(config.hidden_size, self.all_head_size)
         self.key = nn.Linear(config.hidden_size, self.all_head_size)
-        self.value = nn.Linear(config.hidden_size, self.all_head_size)
 
         self.dropout = nn.Dropout(config.attention_probs_dropout_prob)
 
@@ -201,14 +200,14 @@ class SeparableConv1d(nn.Module):
                                    padding=0,
                                    bias=False)
         if bias:
-            self.bias = nn.Parameter(torch.zeros(self.out_ch, 1))
+            self.bias = nn.Parameter(torch.zeros(self.out_ch))
         else:
             self.register_parameter('bias', None)
-        nn.init.kaiming_normal_(self.depthwise_conv.weight)
-        nn.init.kaiming_normal_(self.depthwise_conv.weight)
+        nn.init.kaiming_normal_(self.depthwise.weight)
+        nn.init.kaiming_normal_(self.pointwise.weight)
 
     def forward(self, x):
-        out = self.pointwise_conv(self.depthwise_conv(x))
+        out = self.pointwise(self.depthwise(x.transpose(1, 2))).transpose(1, 2)
         if self.bias is not None:
             out += self.bias
         return out
@@ -265,6 +264,8 @@ class ConvBertMixedAttention(nn.Module):
         else:
             self.num_attention_heads = new_num_attention_heads
         self.all_head_size = self.num_attention_heads * self.attention_head_size
+        self.query = nn.Linear(config.hidden_size, self.all_head_size)
+        self.value = nn.Linear(config.hidden_size, self.all_head_size)
         self.self = ConvBertSelfAttention(config)
         self.sdconv = ConvBertSDConv(config, self.all_head_size, self.num_attention_heads)
         self.self_linear = nn.Linear(self.all_head_size, config.hidden_size // 2)
@@ -290,25 +291,27 @@ class ConvBertMixedAttention(nn.Module):
         else:
             mixed_value_layer = self.value(hidden_states)
 
-        self_out, attention_probs = self.self(hidden_states,
-                                              mixed_query_layer,
-                                              mixed_value_layer,
-                                              attention_mask,
-                                              head_mask,
-                                              encoder_hidden_states,
-                                              encoder_attention_mask,
-                                              output_attentions
-                                              )
+        self_outputs = self.self(hidden_states,
+                                 mixed_query_layer,
+                                 mixed_value_layer,
+                                 attention_mask,
+                                 head_mask,
+                                 encoder_hidden_states,
+                                 encoder_attention_mask,
+                                 output_attentions
+                                 )
+        self_out = self_outputs[0]
+        attention_probs = self_outputs[1:]
 
         conv_out = self.sdconv(mixed_query_layer, mixed_value_layer, hidden_states)
-        bs, seqlen = hidden_states[:2]
+        bs, seqlen = hidden_states.shape[:2]
 
         self_out = self.self_linear(self_out.reshape(bs, seqlen, -1))
         conv_out = self.conv_linear(conv_out.reshape(bs, seqlen, -1))
 
         context_layer = torch.cat([self_out, conv_out], dim=-1)
 
-        outputs = (context_layer, attention_probs) if output_attentions else (context_layer,)
+        outputs = (context_layer,) + attention_probs
         return outputs
 
 

@@ -18,6 +18,7 @@ CONVBERT_PRETRAINED_CONFIG_ARCHIVE_MAP = {
     "google/electra-large-discriminator": "https://huggingface.co/google/electra-large-discriminator/resolve/main/config.json",
 }
 
+
 class ConvBertConfig(PretrainedConfig):
     def __init__(
             self,
