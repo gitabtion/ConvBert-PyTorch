@@ -404,10 +404,11 @@ class GLinear(nn.Module):
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         assert input.shape[-1] == self.in_features
+        bs = input.shape[0]
         input = input.view(-1, self.groups, self.group_in_dim).transpose(0, 1)
         outputs = torch.matmul(input,
                                self.weight).transpose(0, 1).contiguous().view(
-            -1, self.out_features)
+            bs, -1, self.out_features)
         if self.bias is not None:
             outputs += self.bias
         return outputs
