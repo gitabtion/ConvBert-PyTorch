@@ -1,8 +1,9 @@
 # ConvBert-PyTorch
-🤗A unofficial PyTorch implementation of ConvBert based on huggingface/transformers.
+🤗An unofficial PyTorch implementation of ConvBert based on huggingface/transformers.
 
 🤗基于huggingface/transformers的ConvBert的非官方PyTorch实现。
 
+![sdconv](img/convbert.jpg)
 ![sdconv](img/sdconv.jpg)
 
 ## requirements

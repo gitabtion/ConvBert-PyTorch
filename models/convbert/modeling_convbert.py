@@ -1194,13 +1194,13 @@ class ConvBertForTokenClassification(ConvBertPreTrainedModel):
 )
 class ConvBertForQuestionAnswering(ConvBertPreTrainedModel):
     config_class = ConvBertConfig
-    base_model_prefix = "electra"
+    base_model_prefix = "convbert"
 
     def __init__(self, config):
         super().__init__(config)
         self.num_labels = config.num_labels
 
-        self.electra = ConvBertModel(config)
+        self.convbert = ConvBertModel(config)
         self.qa_outputs = nn.Linear(config.hidden_size, config.num_labels)
 
         self.init_weights()
@@ -1238,7 +1238,7 @@ class ConvBertForQuestionAnswering(ConvBertPreTrainedModel):
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        discriminator_hidden_states = self.electra(
+        discriminator_hidden_states = self.convbert(
             input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
@@ -1247,6 +1247,7 @@ class ConvBertForQuestionAnswering(ConvBertPreTrainedModel):
             inputs_embeds=inputs_embeds,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
+            return_dict=return_dict
         )
 
         sequence_output = discriminator_hidden_states[0]
