@@ -631,6 +631,7 @@ class LanguageModelingModel:
                             outputs = (
                                 model(inputs, masked_lm_labels=labels) if args.mlm else model(inputs, labels=labels)
                             )
+                            # outputs = model(inputs, labels=labels)
                         # model outputs are always tuple in pytorch-transformers (see doc)
                         if args.model_type in ["electra", "convbert"]:
                             g_loss = outputs[0]

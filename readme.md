@@ -9,6 +9,7 @@
 ## requirements
 1. transformers==3.5.1
 2. torch>=1.5.0
+3. wandb
 
 ## pretrain
 ```shell script

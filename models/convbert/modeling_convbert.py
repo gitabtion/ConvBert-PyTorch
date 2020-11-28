@@ -864,7 +864,7 @@ class ConvBertForSequenceClassification(ConvBertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         self.num_labels = config.num_labels
-        self.electra = ConvBertModel(config)
+        self.convbert = ConvBertModel(config)
         self.classifier = ConvBertClassificationHead(config)
 
         self.init_weights()
@@ -897,7 +897,7 @@ class ConvBertForSequenceClassification(ConvBertPreTrainedModel):
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        discriminator_hidden_states = self.electra(
+        discriminator_hidden_states = self.convbert(
             input_ids,
             attention_mask,
             token_type_ids,
@@ -946,7 +946,7 @@ class ConvBertForPreTraining(ConvBertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
 
-        self.electra = ConvBertModel(config)
+        self.convbert = ConvBertModel(config)
         self.discriminator_predictions = ConvBertDiscriminatorPredictions(config)
         self.init_weights()
 
@@ -982,7 +982,7 @@ class ConvBertForPreTraining(ConvBertPreTrainedModel):
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        discriminator_hidden_states = self.electra(
+        discriminator_hidden_states = self.convbert(
             input_ids,
             attention_mask,
             token_type_ids,
@@ -1032,7 +1032,7 @@ class ConvBertForMaskedLM(ConvBertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
 
-        self.electra = ConvBertModel(config)
+        self.convbert = ConvBertModel(config)
         self.generator_predictions = ConvBertGeneratorPredictions(config)
 
         self.generator_lm_head = nn.Linear(config.embedding_size, config.vocab_size)
@@ -1044,7 +1044,7 @@ class ConvBertForMaskedLM(ConvBertPreTrainedModel):
     @add_start_docstrings_to_model_forward(CONVBERT_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
     @add_code_sample_docstrings(
         tokenizer_class=_TOKENIZER_FOR_DOC,
-        checkpoint="google/electra-small-discriminator",
+        checkpoint="",
         output_type=MaskedLMOutput,
         config_class=_CONFIG_FOR_DOC,
     )
@@ -1069,7 +1069,7 @@ class ConvBertForMaskedLM(ConvBertPreTrainedModel):
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        generator_hidden_states = self.electra(
+        generator_hidden_states = self.convbert(
             input_ids,
             attention_mask,
             token_type_ids,
@@ -1114,7 +1114,7 @@ class ConvBertForTokenClassification(ConvBertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
 
-        self.electra = ConvBertModel(config)
+        self.convbert = ConvBertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classifier = nn.Linear(config.hidden_size, config.num_labels)
         self.init_weights()
@@ -1146,7 +1146,7 @@ class ConvBertForTokenClassification(ConvBertPreTrainedModel):
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        discriminator_hidden_states = self.electra(
+        discriminator_hidden_states = self.convbert(
             input_ids,
             attention_mask,
             token_type_ids,
@@ -1302,7 +1302,7 @@ class ConvBertForMultipleChoice(ConvBertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
 
-        self.electra = ConvBertModel(config)
+        self.convbert = ConvBertModel(config)
         self.sequence_summary = SequenceSummary(config)
         self.classifier = nn.Linear(config.hidden_size, 1)
 
@@ -1347,7 +1347,7 @@ class ConvBertForMultipleChoice(ConvBertPreTrainedModel):
             else None
         )
 
-        discriminator_hidden_states = self.electra(
+        discriminator_hidden_states = self.convbert(
             input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
