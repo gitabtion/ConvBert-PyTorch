@@ -677,6 +677,7 @@ class LanguageModelingModel:
 
                 tr_loss += loss.item()
                 if (step + 1) % args.gradient_accumulation_steps == 0:
+                    scheduler.step() # Update learning rate schedule
                     if args.fp16:
                         scaler.unscale_(optimizer)
                     torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
@@ -686,7 +687,7 @@ class LanguageModelingModel:
                         scaler.update()
                     else:
                         optimizer.step()
-                    scheduler.step()  # Update learning rate schedule
+                    # scheduler.step()  # Update learning rate schedule
                     model.zero_grad()
                     global_step += 1
 
